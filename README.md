@@ -170,13 +170,14 @@ git gtr new my-feature --name descriptive-variant                               
 
 **Options:**
 
-- `--from <ref>`: Create from specific ref
+- `--from <ref>`: Create from specific ref (defaults to the current branch when run inside a linked worktree, otherwise the default branch)
 - `--from-current`: Create from current branch (useful for parallel variant work)
 - `--remote <name>`: Remote used for default base refs
 - `--track <mode>`: Tracking mode (auto|remote|local|none)
 - `--no-copy`: Skip file copying
 - `--no-fetch`: Skip git fetch
 - `--no-hooks`: Skip post-create hooks
+- `--sparse` / `--no-sparse`: Force or skip sparse-checkout inheritance from the base worktree
 - `--force`: Allow same branch in multiple worktrees (**requires --name or --folder**)
 - `--name <suffix>`: Custom folder name suffix (optional, required with --force)
 - `--folder <name>`: Custom folder name (replaces default, useful for long branch names)

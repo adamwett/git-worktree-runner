@@ -15,7 +15,9 @@ is named after the branch (slashes and special chars become hyphens, e.g.,
 feature/user-auth becomes folder "feature-user-auth").
 
 Options:
-  --from <ref>        Create from a specific ref (default: default branch)
+  --from <ref>        Create from a specific ref
+                      (default: current branch when run inside a linked
+                      worktree, otherwise the default branch)
   --from-current      Create from the current branch (for parallel variants)
   --remote <name>     Remote used for default base refs (default: gtr.defaultRemote)
   --track <mode>      Branch tracking mode: auto|remote|local|none (default: auto)

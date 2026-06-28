@@ -83,3 +83,37 @@ teardown() {
   cmd_create feature/deep --from HEAD --no-fetch --yes
   [ -d "$TEST_WORKTREES_DIR/feature-deep" ]
 }
+
+@test "_in_linked_worktree is false in the main repo, true in a linked worktree" {
+  ! _in_linked_worktree
+  cmd_create base-wt --from HEAD --no-fetch --yes
+  cd "$TEST_WORKTREES_DIR/base-wt"
+  _in_linked_worktree
+}
+
+@test "cmd_create inside a linked worktree defaults base to the current branch" {
+  cmd_create base-wt --from HEAD --no-fetch --yes
+  cd "$TEST_WORKTREES_DIR/base-wt"
+  git commit --allow-empty -m "only-on-base" --quiet
+  local base_sha
+  base_sha=$(git rev-parse HEAD)
+
+  # No --from: should branch off the current worktree's branch, not the default branch
+  cmd_create child-wt --no-fetch --yes
+  [ "$(git -C "$TEST_WORKTREES_DIR/child-wt" rev-parse HEAD)" = "$base_sha" ]
+}
+
+@test "cmd_create in the main repo still defaults base to the default branch" {
+  local main_sha other_sha
+  main_sha=$(git rev-parse HEAD)
+  git update-ref refs/remotes/origin/main "$main_sha"
+
+  # Advance the working branch so 'current' differs from the default branch tip
+  git commit --allow-empty -m "ahead of default" --quiet
+  other_sha=$(git rev-parse HEAD)
+
+  cmd_create from-default --no-fetch --yes
+  # Based off origin/main, not the advanced current HEAD
+  [ "$(git -C "$TEST_WORKTREES_DIR/from-default" rev-parse HEAD)" = "$main_sha" ]
+  [ "$(git -C "$TEST_WORKTREES_DIR/from-default" rev-parse HEAD)" != "$other_sha" ]
+}

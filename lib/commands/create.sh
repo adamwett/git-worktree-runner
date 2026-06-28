@@ -62,6 +62,16 @@ _post_create_next_steps() {
   echo "  cd \"\$(git gtr go $next_steps_id)\"  # Navigate to worktree"
 }
 
+# Determine whether the command is running inside a linked (non-main) worktree.
+# The main worktree has a `.git` directory; linked worktrees have a `.git` file.
+# Usage: _in_linked_worktree
+# Returns: 0 if in a linked worktree, 1 otherwise.
+_in_linked_worktree() {
+  local toplevel
+  toplevel=$(git rev-parse --show-toplevel 2>/dev/null) || return 1
+  [ -n "$toplevel" ] && [ -f "$toplevel/.git" ]
+}
+
 # Determine the base ref for worktree creation
 # Usage: _create_resolve_from_ref <from_ref> <from_current> <repo_root> [remote]
 # Prints: resolved ref
@@ -69,6 +79,13 @@ _create_resolve_from_ref() {
   local from_ref="$1" from_current="$2" repo_root="$3" remote="${4:-$(resolve_default_remote)}"
 
   if [ -z "$from_ref" ]; then
+    # Inside a linked worktree with no explicit base, default to the current
+    # branch (like --from-current) so siblings branch off — and inherit the
+    # sparse-checkout of — the worktree you're working in.
+    if [ "$from_current" -ne 1 ] && _in_linked_worktree; then
+      from_current=1
+    fi
+
     if [ "$from_current" -eq 1 ]; then
       from_ref=$(get_current_branch)
       if [ -z "$from_ref" ] || [ "$from_ref" = "HEAD" ]; then

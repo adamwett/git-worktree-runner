@@ -212,6 +212,11 @@ When working in a large monorepo, a base worktree often uses [sparse-checkout](h
 # A feature branch off it inherits the same cone automatically:
 git gtr new my-app-feature-xyz --from my-app
 
+# Or, working from inside the my-app worktree, just omit --from — gtr
+# branches off the current branch and inherits its cone:
+cd "$(git gtr go my-app)"
+git gtr new my-app-feature-xyz
+
 # The new worktree contains only the inherited sparse slice:
 ls "$(git gtr go my-app-feature-xyz)"
 git -C "$(git gtr go my-app-feature-xyz)" sparse-checkout list
@@ -222,6 +227,7 @@ git gtr new big-refactor --from my-app --no-sparse
 
 **How it works:**
 
+- When run inside a linked worktree with no `--from`, gtr bases the new branch off your current branch (like `--from-current`). From the main repo, the default base is still the default branch.
 - gtr inspects the worktree holding the base ref (`--from`, falling back to the current worktree). If it has sparse-checkout enabled, the new worktree is created with `--no-checkout` and the same cone (or pattern set) is applied — the full tree is never written to disk.
 - Controlled by `gtr.sparse.inherit` (default on). Use `--sparse` / `--no-sparse` to override per command.
 - Full-checkout repositories are unaffected — they always get a full checkout.
